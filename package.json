@@ -1,20 +1,21 @@
 {
-  "name": "@optbot/template",
-  "version": "0.0.2",
-  "description": "template for starting a new package",
-  "main": "lib/start",
+  "name": "@optbot/quotepuller",
+  "version": "0.0.0",
+  "description": "pull daily options quotes",
+  "main": "lib/norequire",
   "scripts": {
     "start": "node lib/start.js",
-    "show": "node lib/show.js",
+    "stop": "node lib/stop.js",
+    "setup": "node lib/setup.js",
     "test": "./node_modules/.bin/mocha"
   },
   "private": true,
   "repository": {
     "type": "git",
-    "url": "git://github.com/optbot/template.git"
+    "url": "git://github.com/optbot/quotepuller.git"
   },
   "keywords": [
-    "template",
+    "quotepuller",
     "optbot"
   ],
   "author": "Marshall Farrier",
@@ -26,8 +27,13 @@
     "lib/"
   ],
   "config": {
-    "host": "localhost",
-    "port": "666"
+    "user": "quotepuller",
+    "db": "mongodb://localhost:27017/"
+  },
+  "dependencies": {
+    "@optbot/pytools": "git://github.com/optbot/pytools.git",
+    "nconf": "~0.7.1",
+    "shelljs": "~0.4.0"
   },
   "devDependencies": {
     "chai": "~2.2.0",
