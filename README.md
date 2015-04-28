@@ -1,6 +1,6 @@
-template
+quotepuller
 ===
-Template for new packages.
+Get daily options quotes and save to a mongo database.
 
 Usage
 ---
@@ -8,6 +8,9 @@ Usage
 1.  Install:
     
         $ npm install
+        $ sudo npm run setup
+
+1.  Configuration. 
 
 2.  Run:
 
