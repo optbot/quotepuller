@@ -2,7 +2,7 @@
   "name": "@optbot/quotepuller",
   "version": "0.0.0",
   "description": "pull daily options quotes",
-  "main": "lib/norequire",
+  "main": "lib/norequire.js",
   "scripts": {
     "start": "node lib/start.js",
     "stop": "node lib/stop.js",

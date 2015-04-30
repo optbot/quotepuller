@@ -8,6 +8,7 @@ Usage
 1.  Install:
     
         $ npm install
+        $ sudo apt-get update
         $ sudo npm run setup
 
 1.  Configuration. 
