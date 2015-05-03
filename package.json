@@ -4,8 +4,8 @@
   "description": "pull daily options quotes",
   "main": "lib/norequire.js",
   "scripts": {
-    "start": "node lib/start.js",
-    "stop": "node lib/stop.js",
+    "start": "node lib/test.js start",
+    "stop": "node lib/test.js stop",
     "setup": "node lib/setup.js",
     "test": "./node_modules/.bin/mocha"
   },
@@ -33,7 +33,9 @@
   "dependencies": {
     "@optbot/pytools": "git://github.com/optbot/pytools.git",
     "nconf": "~0.7.1",
-    "shelljs": "~0.4.0"
+    "shelljs": "~0.4.0",
+    "start-stop-daemon": "~0.1.1",
+    "winston": "~1.0.0"
   },
   "devDependencies": {
     "chai": "~2.2.0",
