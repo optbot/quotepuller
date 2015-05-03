@@ -32,7 +32,6 @@
   },
   "dependencies": {
     "@optbot/pytools": "git://github.com/optbot/pytools.git",
-    "forever-monitor": "~1.5.2",
     "nconf": "~0.7.1",
     "shelljs": "~0.4.0"
   },

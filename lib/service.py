@@ -50,16 +50,17 @@ def eqpuller(dbconn):
     _client.close()
     logger.info('db connection closed')
 
-def stop_handler(signal, frame):
+def stop_handler(_signal, frame):
     # http://stackoverflow.com/questions/1112343/how-do-i-capture-sigint-in-python/1112350#1112350
-    logger.info('stopping')
+    msg = ('SIGINT' if _signal == signal.SIGINT else 'SIGTERM')
+    logger.info('signal {} received. stopping'.format(msg))
     sys.exit(0)
 
 def run():
     logger.info('starting')
     signal.pause()
 
-if __name__ == '__main__':
+def init():
     _parser = argparse.ArgumentParser()
     _parser.add_argument('--logpath', required=True)
     _parser.add_argument('--logfmt', required=True)
@@ -70,5 +71,9 @@ if __name__ == '__main__':
     _handler.setFormatter(_formatter)
     logger.addHandler(_handler)
     logger.setLevel(logging.INFO)
+    signal.signal(signal.SIGTERM, stop_handler)
     signal.signal(signal.SIGINT, stop_handler)
+
+if __name__ == '__main__':
+    init()
     run()
