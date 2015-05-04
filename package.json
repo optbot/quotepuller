@@ -4,8 +4,8 @@
   "description": "pull daily options quotes",
   "main": "lib/norequire.js",
   "scripts": {
-    "start": "node lib/starttest.js",
-    "stop": "node lib/stoptest.js",
+    "start": "node lib/start.js",
+    "stop": "node lib/stop.js",
     "setup": "node lib/setup.js",
     "test": "./node_modules/.bin/mocha"
   },
