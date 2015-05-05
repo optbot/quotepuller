@@ -31,3 +31,4 @@ echo "venvs: ${venvs}"
 echo "logs: ${logs}"
 echo "dbconn: ${dbconn}"
 echo "service: ${service}"
+/usr/bin/python /mnt/disk1/home/marshall/workspace/quotepuller/lib/service.py

@@ -74,6 +74,16 @@ def init():
     signal.signal(signal.SIGTERM, stop_handler)
     signal.signal(signal.SIGINT, stop_handler)
 
+def init_tst():
+    # hardcoded configuration
+    _handler = logging.FileHandler('/mnt/disk1/var/log/optbot/quotepuller/service.log')
+    _formatter = logging.Formatter("%(asctime)s %(levelname)s %(module)s.%(funcName)s : %(message)s")
+    _handler.setFormatter(_formatter)
+    logger.addHandler(_handler)
+    logger.setLevel(logging.INFO)
+    signal.signal(signal.SIGTERM, stop_handler)
+    signal.signal(signal.SIGINT, stop_handler)
+
 if __name__ == '__main__':
-    init()
+    init_tst()
     run()
