@@ -4,6 +4,8 @@
 
 Create configuration file for quotepuller service
 =================================================
+Gets arguments as command line options and writes
+values to re-usable config file.
 """
 
 import argparse
@@ -11,7 +13,7 @@ import ConfigParser
 import os.path
 import sys
 
-service_name = 'quotepuller'
+import constants
 
 def get_args():
     _parser = argparse.ArgumentParser()
@@ -22,7 +24,7 @@ def get_args():
 
 def set_config(args, fname):
     _config = ConfigParser.SafeConfigParser()
-    _sec = 'Section1'
+    _sec = constants.CFGSEC_MAIN
     _config.add_section(_sec)
     print('setting logpath to "{}"'.format(args.logpath))
     _config.set(_sec, 'logpath', args.logpath)
@@ -34,7 +36,7 @@ def set_config(args, fname):
         _config.write(configfile)
 
 def init():
-    _fname = '/etc/quichean/{}.cfg'.format(service_name)
+    _fname = constants.CONFIGFILE
     if os.path.isfile(_fname):
         _msg = 'file "{}" already exists. Delete file to reset configurations'.format(_fname)
         print('\033[91m' + _msg + '\033[0m')
