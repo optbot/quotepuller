@@ -4,6 +4,12 @@
 
 Quote puller service main
 =========================
+Start the service from the python interpreter in the appropriate virtual
+environment:
+http://stackoverflow.com/questions/7807315/daemonizing-a-python-script-in-debian-using-virtualenv
+For example:
+
+    $ /var/local/.virtualenvs/quotepuller/bin/python <path>/quotepuller.py
 """
 import ConfigParser
 import logging
