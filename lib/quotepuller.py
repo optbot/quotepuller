@@ -15,6 +15,7 @@ import ConfigParser
 import logging
 import signal
 import sys
+import os.path
 
 import constants
 
@@ -37,11 +38,7 @@ def init():
     _logpath = _config.get(_sec, 'logpath', 1) 
     _logfmt = _config.get(_sec, 'logfmt', 1)
     _dbconn = _config.get(_sec, 'dbconn', 1)
-    print(_logpath)
-    print(_logfmt)
-    print(_dbconn)
-    return
-    _handler = logging.FileHandler(_logpath)
+    _handler = logging.FileHandler(os.path.join(_logpath, 'service.log'))
     _formatter = logging.Formatter(_logfmt)
     _handler.setFormatter(_formatter)
     logger.addHandler(_handler)

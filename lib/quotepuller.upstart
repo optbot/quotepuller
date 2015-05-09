@@ -1,0 +1,10 @@
+# Ubuntu upstart file at /etc/init/quotepuller.conf
+# Cf. https://github.com/mongodb/mongo/blob/master/debian/mongod.upstart
+
+start on runlevel [2345]
+stop on runlevel [06]
+
+script
+  PYTHON=`cat /usr/local/lib/quichean/quotepuller/python.txt`
+  DAEMON_USER="quotepuller"
+end script

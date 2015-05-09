@@ -26,6 +26,7 @@ done
 PYTHON="${venv}/bin/python"
 PIDFILE="/var/run/${user}.pid"
 DAEMON_MGR="start-stop-daemon"
+INFO_LEVEL="--verbose"
 
 # Cf. https://github.com/mongodb/mongo/blob/47f76710961fb5be17d92e26fb7452f8223afb9f/debian/init.d#L122
 # http://stackoverflow.com/questions/16855541/how-to-properly-use-log-daemon-msg-log-end-msg-log-progress-msg-to-write-a-pro
@@ -52,15 +53,15 @@ running() {
 }
 
 start_server() {
-    $DAEMON_MGR --background --start --quiet --pidfile $PIDFILE \
-        --make-pidfile --chuid $user \
+    $DAEMON_MGR --background --start $INFO_LEVEL --pidfile $PIDFILE \
+        --make-pidfile --chuid $user:$user \
         --exec $PYTHON $service
     errcode=$?
     return $errcode
 }
 
 stop_server() {
-    $DAEMON_MGR --stop --quiet --pidfile $PIDFILE \
+    $DAEMON_MGR --stop $INFO_LEVEL --pidfile $PIDFILE \
         --retry 300 \
         --user $user \
         --exec $PYTHON
@@ -84,9 +85,11 @@ case "$action" in
             if  running ;  then
                 log_end_msg 0
             else
+                echo "process died after starting"
                 log_end_msg 1
             fi
         else
+            echo "process could not be started"
             log_end_msg 1
         fi
         ;;
