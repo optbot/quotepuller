@@ -7,4 +7,13 @@ stop on runlevel [06]
 script
   PYTHON=`cat /usr/local/lib/quichean/quotepuller/python.txt`
   DAEMON_USER="quotepuller"
+  SERVICE="/usr/local/lib/quichean/${DAEMON_USER}/${DAEMON_USER}.py"
+  DAEMON_MGR="start-stop-daemon"
+  PIDFILE="/var/run/${DAEMON_USER}.pid"
+
+  exec $DAEMON_MGR --start \
+    --chuid $DAEMON_USER:$DAEMON_USER \
+    --pidfile $PIDFILE \
+    --make-pidfile \
+    --exec $PYTHON $SERVICE
 end script

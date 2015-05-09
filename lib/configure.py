@@ -20,6 +20,7 @@ def get_args():
     _parser.add_argument('--logpath', required=True)
     _parser.add_argument('--logfmt', required=True)
     _parser.add_argument('--dbconn', required=True)
+    _parser.add_argument('--service', required=True)
     return _parser.parse_args()
 
 def set_config(args, fname):
@@ -36,12 +37,13 @@ def set_config(args, fname):
         _config.write(configfile)
 
 def init():
-    _fname = constants.CONFIGFILE
-    if os.path.isfile(_fname):
-        _msg = 'file "{}" already exists. Delete file to reset configurations'.format(_fname)
+    _args = get_args()
+    if _args.service != constants.SERVICE_NAME:
+        _msg = 'failed! service name "{}" is not the same as "{}"'.format(_args.service,
+                constants.SERVICE_NAME)
         print('\033[91m' + _msg + '\033[0m')
         sys.exit(1)
-    _args = get_args()
+    _fname = constants.CONFIGFILE
     set_config(_args, _fname)
 
 if __name__ == '__main__':
