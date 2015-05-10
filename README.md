@@ -20,6 +20,8 @@ Usage
 1.  Stop:
 
         $ sudo npm stop
+
+1. Start and stop in test mode. See [below](#testing).
        
 #### Configuration
 ##### Initialize
@@ -43,7 +45,22 @@ More info in the [Quichean wiki](https://github.com/aisthesis/quichean/wiki/Conf
 Testing
 ---
 ### Functionality
-    $ npm test
+To start and stop the service in test mode, use the commands:
+
+    $ sudo npm start -- --test
+    $ sudo npm stop
+
+The start command in test mode really does start the service, so
+be sure to stop it when you are finished verifying that it is working.
+Note that the `stop` command is the same whether testing or running live.
+
+#### Differences
+- In test mode the service immediately attempts to retrieve options quotes
+regardless of time of day or day of week. When running outside of test mode,
+the service will instead wait until market close and will not attempt to 
+retrieve data on weekends or holidays.
+- In test mode the service will write quote data to a special `optionsTst`
+database.
 
 ### Code conformity
     $ jshint lib test

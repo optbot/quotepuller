@@ -1,5 +1,5 @@
 #!/bin/bash
-TEMP=$(getopt -n "$0" -o a:s:u:v: --long action:,service:,user:,venv: -- "$@")
+TEMP=$(getopt -n "$0" -o a:s:tu:v: --long action:,service:,test,user:,venv: -- "$@")
 if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
 eval set -- "$TEMP"
 while true;
@@ -14,6 +14,9 @@ do
         -u|--user)
             user="$2"
             shift 2;;
+        -t|--test)
+            python_opts="--test"
+            shift ;;
         -v|--venv)
             venv="$2"
             shift 2;;
@@ -55,7 +58,7 @@ running() {
 start_server() {
     $DAEMON_MGR --background --start $INFO_LEVEL --pidfile $PIDFILE \
         --make-pidfile --chuid $user:$user \
-        --exec $PYTHON $service
+        --exec $PYTHON $service -- $python_opts
     errcode=$?
     return $errcode
 }

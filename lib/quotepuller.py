@@ -11,6 +11,7 @@ For example:
 
     $ /var/local/.virtualenvs/quotepuller/bin/python <path>/quotepuller.py
 """
+import argparse
 import ConfigParser
 import logging
 import signal
@@ -20,6 +21,7 @@ import os.path
 import constants
 
 logger = logging.getLogger(constants.SERVICE_NAME)
+test_mode = False
 
 def stop_handler(_signal, frame):
     # http://stackoverflow.com/questions/1112343/how-do-i-capture-sigint-in-python/1112350#1112350
@@ -32,11 +34,17 @@ def run():
     signal.pause()
 
 def init():
+    # check for test mode
+    _parser = argparse.ArgumentParser()
+    _parser.add_argument('--test', action='store_true')
+    test_mode = _parser.parse_args().test
     _config = ConfigParser.SafeConfigParser()
     _sec = constants.CFGSEC_MAIN
     _config.read(constants.CONFIGFILE)
     _logpath = _config.get(_sec, 'logpath', 1) 
     _logfmt = _config.get(_sec, 'logfmt', 1)
+    if test_mode:
+        _logfmt += ' (TESTING)'
     _dbconn = _config.get(_sec, 'dbconn', 1)
     _handler = logging.FileHandler(os.path.join(_logpath, 'service.log'))
     _formatter = logging.Formatter(_logfmt)
