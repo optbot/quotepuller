@@ -14,10 +14,11 @@ For example:
 import argparse
 import ConfigParser
 import logging
+import os.path
 from functools import partial
 import signal
 import sys
-import os.path
+import time
 
 import constants
 import dbwrapper
@@ -35,7 +36,15 @@ def stop_handler(_signal, frame):
 def run(dbconn):
     logger.info('starting')
     logger.debug('dbconn: {}'.format(dbconn))
-    _equities = dbwrapper.job(dbconn, logger, partial(eqgetter.active, test_mode))
+    _success = False
+    while not _success:
+        try:
+            _equities = dbwrapper.job(dbconn, logger, partial(eqgetter.active, test_mode))
+        except:
+            logger.error('could not retrieve equities')
+            time.sleep(300)
+        else:
+            _success = True
     signal.pause()
 
 def init():

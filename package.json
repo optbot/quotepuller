@@ -28,7 +28,10 @@
   ],
   "config": {
     "user": "quotepuller",
-    "db": "mongodb://localhost:27017/"
+    "db": {
+      "prod": "mongodb://localhost:27017/",
+      "dev": "mongodb://localhost:27017/"
+    }
   },
   "dependencies": {
     "@optbot/pytools": "git://github.com/optbot/pytools.git",
