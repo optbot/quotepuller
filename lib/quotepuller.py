@@ -41,7 +41,7 @@ def run(dbconn):
         try:
             _equities = dbwrapper.job(dbconn, logger, partial(eqgetter.active, test_mode))
         except:
-            logger.error('could not retrieve equities')
+            logger.exception('could not retrieve equities')
             time.sleep(300)
         else:
             _success = True
