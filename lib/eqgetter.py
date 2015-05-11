@@ -6,12 +6,12 @@ Get active equities
 ===================
 """
 
-import dbconn
 import constants
 
-def active(logger, test_mode, client):
+def active(test_mode, logger, client):
     # for now use production as source regardless of test_mode
     _db = client[constants.DB]
-    _active = _db.find({"active": True})
-    return [item['symbol'] for item in _active]
-
+    _active = _db.equities.find({"active": True})
+    _ret = [item['symbol'] for item in _active]
+    logger.debug(_ret)
+    return _ret

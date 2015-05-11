@@ -14,11 +14,14 @@ For example:
 import argparse
 import ConfigParser
 import logging
+from functools import partial
 import signal
 import sys
 import os.path
 
 import constants
+import dbwrapper
+import eqgetter
 
 logger = logging.getLogger(constants.SERVICE_NAME)
 test_mode = False
@@ -29,8 +32,10 @@ def stop_handler(_signal, frame):
     logger.info('signal {} received. stopping'.format(msg))
     sys.exit(0)
 
-def run():
+def run(dbconn):
     logger.info('starting')
+    logger.debug('dbconn: {}'.format(dbconn))
+    _equities = dbwrapper.job(dbconn, logger, partial(eqgetter.active, test_mode))
     signal.pause()
 
 def init():
@@ -45,15 +50,20 @@ def init():
     _logfmt = _config.get(_sec, 'logfmt', 1)
     if test_mode:
         _logfmt += ' (TESTING)'
-    _dbconn = _config.get(_sec, 'dbconn', 1)
     _handler = logging.FileHandler(os.path.join(_logpath, 'service.log'))
     _formatter = logging.Formatter(_logfmt)
     _handler.setFormatter(_formatter)
     logger.addHandler(_handler)
-    logger.setLevel(logging.INFO)
+    if test_mode:
+        logger.setLevel(logging.DEBUG)
+    else:
+        logger.setLevel(logging.INFO)
+    dbconn = _config.get(_sec, 'dbconn', 1)
+    logger.debug('dbconn: {}'.format(dbconn))
     signal.signal(signal.SIGTERM, stop_handler)
     signal.signal(signal.SIGINT, stop_handler)
+    return dbconn
 
 if __name__ == '__main__':
-    init()
-    run()
+    _dbconn = init()
+    run(_dbconn)
