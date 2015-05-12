@@ -20,6 +20,8 @@ import signal
 import sys
 import time
 
+from pymongo.errors import ConnectionFailure
+
 import constants
 import dbwrapper
 import eqgetter
@@ -40,7 +42,7 @@ def run(dbconn):
     while not _success:
         try:
             _equities = dbwrapper.job(dbconn, logger, partial(eqgetter.active, test_mode))
-        except:
+        except ConnectionFailure:
             logger.exception('could not retrieve equities')
             time.sleep(constants.RETRYSECS_DBCONNECT)
         else:
