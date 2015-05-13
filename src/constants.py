@@ -9,7 +9,7 @@ Constants
 # Configuration
 SERVICE_NAME = 'quotepuller'
 CONFIGFILE = '/etc/quichean/{}.cfg'.format(SERVICE_NAME)
-CFGSEC_MAIN = 'Main'
+CFGSECTION_MAIN = 'Main'
 
 # database
 DB = 'optionsMkt'

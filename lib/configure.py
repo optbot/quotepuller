@@ -25,7 +25,7 @@ def get_args():
 
 def set_config(args, fname):
     _config = ConfigParser.SafeConfigParser()
-    _sec = constants.CFGSEC_MAIN
+    _sec = constants.CFGSECTION_MAIN
     _config.add_section(_sec)
     print('setting logpath to "{}"'.format(args.logpath))
     _config.set(_sec, 'logpath', args.logpath)

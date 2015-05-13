@@ -17,7 +17,7 @@ from pytz import timezone
 
 import constants
 
-class QuoteMediator(object):
+class QpService(object):
     def __init__(self, logger, test_mode):
         self._test_mode = test_mode
         self._logger = logger
@@ -141,49 +141,3 @@ def updateall(nysenow, client):
     for _eq in _active.find():
         _success = updateeq(_db, _eq['equity'], nysenow) and _success
     return _success
-
-def startservice():
-    _host = '127.0.0.1'
-    _backlog = 1
-    _sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    _sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    _sock.bind((_host, _locconst.PORT))
-    _sock.listen(_backlog)
-    _running = True
-    _checker = Checker()
-    _checker.start()
-    while _running:
-        _client, _address = _sock.accept()
-        _msg = _client.recv(_constants.MSGSIZE).decode()
-        if _msg == _constants.KILLSIG:
-            _checker.close()
-            _running = False
-            _client.send('quote server closing'.encode())
-    _client.close()
-
-def stopservice():
-    _host = 'localhost'
-    _sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    _sock.connect((_host, _locconst.PORT))
-    _sock.send(_constants.KILLSIG.encode())
-    _response = _sock.recv(_constants.MSGSIZE).decode()
-    _sock.close()
-    logger.info(_response)
-    print(_response)
-
-if __name__ == '__main__':
-    _parser = argparse.ArgumentParser()
-    _parser.add_argument("--start", help="start quote service", action="store_true")
-    _parser.add_argument("--stop", help="stop quote service", action="store_true")
-    _parser.add_argument("-A", "--alwaysrun", help="insert quotes on weekends and holidays",
-            action="store_true")
-    _args = _parser.parse_args()
-    if _args.stop:
-        stopservice()
-    elif _args.start:
-        run_any_day = _args.alwaysrun
-        if _args.alwaysrun:
-            logger.info("Inserting quotes even on weekends and holidays")
-        startservice()
-    else:
-        _parser.print_help()
