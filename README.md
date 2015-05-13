@@ -62,6 +62,14 @@ retrieve data on weekends or holidays.
 - In test mode the service will write quote data to a special `optionsTst`
 database.
 
+#### Troubleshooting
+If the service isn't working despite seemingly successful installation, the
+required python libraries probably didn't get installed correctly. Starting with
+`numpy`, verify that you really can import the modules listed in `requirements.txt`
+when using the `quotepuller` virtual environment. If not, do `sudo su`, activate
+the virtual environment, install everything needed by hand, then `chown` the
+virtual environment directory as specified in `setup.js`.
+
 ### Code conformity
     $ jshint lib test
     $ jscs .
