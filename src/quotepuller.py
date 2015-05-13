@@ -25,6 +25,7 @@ from pymongo.errors import ConnectionFailure
 import constants
 import dbwrapper
 import eqgetter
+import qp_service
 
 class QuotePuller(object):
     def __init__(self):
