@@ -11,6 +11,12 @@ Usage
         $ sudo apt-get update
         $ sudo npm run setup
 
+    To restrict setup to updating only the code for configuring
+    and running the daemon process (without creating a new user
+    or a python virtual environment):
+
+        $ sudo npm run setup -- --daemon
+
 1.  Configuration. See [below](#configuration).
 
 1.  Start:
