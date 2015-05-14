@@ -28,3 +28,4 @@ STRFIELDS = ('Underlying', 'Opt_Type', 'Opt_Symbol',)
 # retry parameters
 RETRYSECS_QUOTES = 10. * 60.
 RETRYSECS_DBCONNECT = 5. * 60.
+N_DBRETRIES = 2

@@ -13,28 +13,27 @@ For example:
 """
 import argparse
 import ConfigParser
+from collections import deque
 import logging
 import os.path
-from functools import partial
 import signal
 import sys
-import time
-
-from pymongo.errors import ConnectionFailure
 
 import constants
-import dbwrapper
 import eqgetter
+from eqgetter import getequities
+from eqqueue_nodemaker import makequeuenodes
 from qp_service import QpService
 
 class QuotePuller(object):
     def __init__(self):
         """
         Members:
-        logger
-        test_mode
         dbconn
+        equities
+        logger
         service
+        test_mode
         """
         _parser = argparse.ArgumentParser()
         _parser.add_argument('--test', action='store_true')
@@ -58,21 +57,18 @@ class QuotePuller(object):
             self.logger.setLevel(logging.INFO)
         self.dbconn = _config.get(_section, 'dbconn', 1)
         self.logger.debug('dbconn: {}'.format(self.dbconn))
+        self.equities = deque()
         self.service = QpService(self.logger, self.test_mode)
         signal.signal(signal.SIGTERM, self.stop_handler)
         signal.signal(signal.SIGINT, self.stop_handler)
 
     def run(self):
         self.logger.info('starting')
-        _success = False
-        while not _success:
-            try:
-                _equities = dbwrapper.job(self.dbconn, self.logger, partial(eqgetter.active, self.test_mode))
-            except ConnectionFailure:
-                self.logger.exception('could not retrieve equities')
-                time.sleep(constants.RETRYSECS_DBCONNECT)
-            else:
-                _success = True
+        _equities = getequities(self.dbconn, self.logger, self.test_mode)
+        _eqnodes = makequeuenodes(_equities)
+        for _node in _eqnodes:
+            self.equities.append(_node)
+        self.logger.debug(self.equities)
         signal.pause()
 
     def stop_handler(self, sig, frame):
