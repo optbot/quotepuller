@@ -5,6 +5,11 @@ Get daily options quotes and save to a mongo database.
 Usage
 ---
 ### Basic
+1.  Install, configure and run `@optbot/pytools` to configure 
+    Python and Python virtual environments on the server and to
+    set `npm` configurations so that the necessary Python
+    tools can be used by other `optbot` packages.
+
 1.  Install:
     
         $ npm install
