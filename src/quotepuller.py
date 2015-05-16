@@ -36,6 +36,7 @@ class QuotePuller(object):
         logger
         service
         test_mode
+        _quote_retrysecs
         """
         _parser = argparse.ArgumentParser()
         _parser.add_argument('--test', action='store_true')
@@ -60,6 +61,9 @@ class QuotePuller(object):
         self.dbconn = _config.get(_section, 'dbconn', 1)
         self.logger.debug('dbconn: {}'.format(self.dbconn))
         self.equities = deque()
+        self._quote_retrysecs = (constants.RETRYSECS_QUOTES_TST if self.test_mode else
+                constants.RETRYSECS_QUOTES)
+        self.logger.info('retry seconds set to {}'.format(self._quote_retrysecs))
         signal.signal(signal.SIGTERM, self.stop_handler)
         signal.signal(signal.SIGINT, self.stop_handler)
 
@@ -73,21 +77,28 @@ class QuotePuller(object):
             self.equities.append(_node)
         self.logger.debug(self.equities)
         try:
-            self.process_queue()
+            self._process_queue()
         except:
             self.logger.exception('something went wrong')
         signal.pause()
 
-    def process_queue(self):
-        _retrysecs = (constants.RETRYSECS_QUOTES_TST if self.test_mode else
-                constants.RETRYSECS_QUOTES)
-        self.logger.info('retry seconds set to {}'.format(_retrysecs))
+    def _process_queue(self):
+        _counter = 0
+        _autofail_tst = 5
         while self.equities:
             _eq = self.equities.pop()['symbol']
             if not savequotes(self.dbconn, self.logger, self.test_mode, _eq):
-                _nysenow = dt.datetime.now(tz=timezone('US/Eastern'))
-                _wait_until = _nysenow + dt.timedelta(0, _retrysecs)
-                self.equities.appendleft({"symbol": _eq, "waitUntil": _wait_until})
+                self._requeue(_eq)
+            if self.test_mode and _counter == _autofail_tst:
+                self.logger.debug('simulating failure for testing')
+                self._requeue(_eq)
+            _counter += 1
+
+    def _requeue(self, _eq):
+        _nysenow = dt.datetime.now(tz=timezone('US/Eastern'))
+        _wait_until = _nysenow + dt.timedelta(0, self._quote_retrysecs)
+        self.equities.appendleft({"symbol": _eq, "waitUntil": _wait_until})
+        self.logger.debug(self.equities)
 
     def stop_handler(self, sig, frame):
         # http://stackoverflow.com/questions/1112343/how-do-i-capture-sigint-in-python/1112350#1112350
