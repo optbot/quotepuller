@@ -19,7 +19,7 @@ def getequities(dbconn, logger, test_mode):
     _equities = []
     while _retries > 0:
         try:
-            _equities = dbwrapper.job(dbconn, logger, partial(active, test_mode))
+            _equities = dbwrapper.job(dbconn, logger, partial(_active, test_mode))
         except ConnectionFailure:
             logger.exception('could not retrieve equities')
             _retries -= 1
@@ -28,10 +28,10 @@ def getequities(dbconn, logger, test_mode):
             _retries = 0
     return _equities
 
-def active(test_mode, logger, client):
+def _active(test_mode, logger, client):
     # for now use production as source regardless of test_mode
     _db = client[constants.DB]
-    _active = _db.equities.find({"active": True})
-    _ret = [item['symbol'] for item in _active]
+    _equities = _db.equities.find({"active": True})
+    _ret = [item['symbol'] for item in _equities]
     logger.debug(_ret)
     return _ret
