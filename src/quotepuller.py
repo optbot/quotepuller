@@ -19,6 +19,7 @@ import logging
 import os.path
 import signal
 import sys
+import time
 
 from pytz import timezone
 
@@ -37,6 +38,7 @@ class QuotePuller(object):
         service
         test_mode
         _quote_retrysecs
+        _die
         """
         _parser = argparse.ArgumentParser()
         _parser.add_argument('--test', action='store_true')
@@ -64,22 +66,27 @@ class QuotePuller(object):
         self._quote_retrysecs = (constants.RETRYSECS_QUOTES_TST if self.test_mode else
                 constants.RETRYSECS_QUOTES)
         self.logger.info('retry seconds set to {}'.format(self._quote_retrysecs))
+        self._die = False
         signal.signal(signal.SIGTERM, self.stop_handler)
         signal.signal(signal.SIGINT, self.stop_handler)
 
     def run(self):
         self.logger.info('starting')
-        _nysenow = dt.datetime.now(tz=timezone('US/Eastern'))
-        self.logger.info('time in NY is {}'.format(_nysenow))
-        _equities = getequities(self.dbconn, self.logger, self.test_mode)
-        _eqnodes = makequeuenodes(_equities, _nysenow)
-        for _node in _eqnodes:
-            self.equities.append(_node)
-        self.logger.debug(self.equities)
         try:
+            _nysenow = dt.datetime.now(tz=timezone('US/Eastern'))
+            self.logger.info('time in NY is {}'.format(_nysenow))
+            _equities = getequities(self.dbconn, self.logger, self.test_mode)
+            _eqnodes = makequeuenodes(_equities, _nysenow)
+            for _node in _eqnodes:
+                self.equities.append(_node)
+            self.logger.debug(self.equities)
             self._process_queue()
+        except SystemExit:
+            self.logger.info('terminating process')
+            sys.exit(0)
         except:
-            self.logger.exception('something went wrong')
+            self.logger.exception('unknown exception')
+            raise
         signal.pause()
 
     def _process_queue(self):
@@ -93,6 +100,9 @@ class QuotePuller(object):
                 self.logger.debug('simulating failure for testing')
                 self._requeue(_eq)
             _counter += 1
+            if self._die:
+                self.logger.info("dying during or after pulling quotes for '{}'".format(_eq))
+                raise SystemExit
 
     def _requeue(self, _eq):
         _nysenow = dt.datetime.now(tz=timezone('US/Eastern'))
@@ -104,6 +114,7 @@ class QuotePuller(object):
         # http://stackoverflow.com/questions/1112343/how-do-i-capture-sigint-in-python/1112350#1112350
         msg = ('SIGINT' if sig == signal.SIGINT else 'SIGTERM')
         self.logger.info('signal {} received. stopping'.format(msg))
+        self._die = True
         sys.exit(0)
 
 if __name__ == '__main__':
