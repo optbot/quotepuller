@@ -19,7 +19,8 @@ import logging
 import os.path
 import signal
 import sys
-import time
+import threading
+#import time
 
 from pytz import timezone
 
@@ -28,7 +29,6 @@ from eqgetter import getequities
 from eqqueue_nodemaker import makequeuenodes
 from qp_runner import savequotes
 from timing_mgr import secs_to_next_run
-# secs_to_next_run(nysenow, test_mode):
 
 class QuotePuller(object):
     def __init__(self):
@@ -71,13 +71,17 @@ class QuotePuller(object):
         self.logger.info('retry seconds set to {}'.format(self._quote_retrysecs))
         self._die = False
         self._job = None
-        self._secs_to_next_run = 0.
+        self._secs_to_next_run = secs_to_next_run(self.logger)
+        if self.test_mode:
+            self.logger.debug('resetting delay to 0 in test mode')
+            self._sec_to_next_run = 0.
         signal.signal(signal.SIGTERM, self.stop_handler)
         signal.signal(signal.SIGINT, self.stop_handler)
 
     def start(self):
         self.logger.info('starting')
-        self.run()
+        self._job = threading.Timer(self._secs_to_next_run, self.run)
+        self._job.start()
         signal.pause()
 
     def run(self):
@@ -124,6 +128,7 @@ class QuotePuller(object):
         msg = ('SIGINT' if sig == signal.SIGINT else 'SIGTERM')
         self.logger.info('signal {} received. stopping'.format(msg))
         self._die = True
+        self._job.cancel()
         sys.exit(0)
 
 if __name__ == '__main__':

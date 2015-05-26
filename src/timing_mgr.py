@@ -6,5 +6,9 @@ Time to wait until next run
 ===========================
 """
 
-def secs_to_next_run(nysenow, test_mode):
+from pandas.tseries.offsets import BDay
+from pytz import timezone
+
+def secs_to_next_run(logger):
+    logger.info('determining correct wait time')
     return 0.
