@@ -26,6 +26,7 @@ DATEFIELDS = ('Quote_Time', 'Expiry',)
 STRFIELDS = ('Underlying', 'Opt_Type', 'Opt_Symbol',)
 
 # retry parameters
+# seconds to wait if quote retrieval fails
 RETRYSECS_QUOTES = 10 * 60
 RETRYSECS_QUOTES_TST = 60
 RETRYSECS_DBCONNECT = 5. * 60.

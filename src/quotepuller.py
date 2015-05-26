@@ -27,6 +27,8 @@ import constants
 from eqgetter import getequities
 from eqqueue_nodemaker import makequeuenodes
 from qp_runner import savequotes
+from timing_mgr import secs_to_next_run
+# secs_to_next_run(nysenow, test_mode):
 
 class QuotePuller(object):
     def __init__(self):
@@ -39,6 +41,7 @@ class QuotePuller(object):
         test_mode
         _quote_retrysecs
         _die
+        _job
         """
         _parser = argparse.ArgumentParser()
         _parser.add_argument('--test', action='store_true')
@@ -67,11 +70,18 @@ class QuotePuller(object):
                 constants.RETRYSECS_QUOTES)
         self.logger.info('retry seconds set to {}'.format(self._quote_retrysecs))
         self._die = False
+        self._job = None
+        self._secs_to_next_run = 0.
         signal.signal(signal.SIGTERM, self.stop_handler)
         signal.signal(signal.SIGINT, self.stop_handler)
 
-    def run(self):
+    def start(self):
         self.logger.info('starting')
+        self.run()
+        signal.pause()
+
+    def run(self):
+        self.logger.info('running')
         try:
             _nysenow = dt.datetime.now(tz=timezone('US/Eastern'))
             self.logger.info('time in NY is {}'.format(_nysenow))
@@ -87,7 +97,6 @@ class QuotePuller(object):
         except:
             self.logger.exception('unknown exception')
             raise
-        signal.pause()
 
     def _process_queue(self):
         _counter = 0
@@ -118,4 +127,4 @@ class QuotePuller(object):
         sys.exit(0)
 
 if __name__ == '__main__':
-    QuotePuller().run()
+    QuotePuller().start()
