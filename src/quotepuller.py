@@ -71,17 +71,13 @@ class QuotePuller(object):
         self.logger.info('retry seconds set to {}'.format(self._quote_retrysecs))
         self._die = False
         self._job = None
-        self._secs_to_next_run = secs_to_next_run(self.logger)
-        if self.test_mode:
-            self.logger.debug('resetting delay to 0 in test mode')
-            self._sec_to_next_run = 0.
+        self._set_secs_to_next_run(True)
         signal.signal(signal.SIGTERM, self.stop_handler)
         signal.signal(signal.SIGINT, self.stop_handler)
 
     def start(self):
         self.logger.info('starting')
-        self._job = threading.Timer(self._secs_to_next_run, self.run)
-        self._job.start()
+        self._setup_nextjob()
         signal.pause()
 
     def run(self):
@@ -101,12 +97,27 @@ class QuotePuller(object):
         except:
             self.logger.exception('unknown exception')
             raise
+        self._set_secs_to_next_run(False)
+        self._setup_nextjob()
+
+    def _setup_nextjob(self):
+        self._job = threading.Timer(self._secs_to_next_run, self.run)
+        self._job.start()
+        self.logger.info('job set to start in {:.0f} seconds'.format(self._secs_to_next_run))
+
+    def _set_secs_to_next_run(self, runtoday):
+        self._secs_to_next_run = secs_to_next_run(self.logger, runtoday)
+        if self.test_mode:
+            _test_delay_secs = 2.
+            self.logger.debug('resetting delay to {} in test mode'.format(_test_delay_secs))
+            self._secs_to_next_run = _test_delay_secs
 
     def _process_queue(self):
         _counter = 0
         _autofail_tst = 5
         while self.equities:
             _eq = self.equities.pop()['symbol']
+            # TODO sleep here if eq not ready to process (requeue delay)
             if not savequotes(self.dbconn, self.logger, self.test_mode, _eq):
                 self._requeue(_eq)
             if self.test_mode and _counter == _autofail_tst:
