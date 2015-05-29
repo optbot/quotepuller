@@ -12,9 +12,11 @@ Opens and closes db connection.
 from pymongo import MongoClient
 
 def job(conn_name, logger, fn):
-    _client = MongoClient()
+    _client = MongoClient(conn_name)
     logger.info("db connection opened")
-    _ret = fn(logger, _client)
-    _client.close()
-    logger.info("db connection closed")
+    try:
+        _ret = fn(logger, _client)
+    finally:
+        _client.close()
+        logger.info("db connection closed")
     return _ret

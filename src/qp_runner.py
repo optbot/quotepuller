@@ -18,6 +18,7 @@ import pynance as pn
 from pytz import timezone
 
 import constants
+import dbwrapper
 
 def savequotes(dbconn, logger, test_mode, equity):
     """
@@ -34,8 +35,24 @@ def savequotes(dbconn, logger, test_mode, equity):
         logger.exception("exception retrieving quotes for '{}'".format(equity))
         return False
     logger.info("quotes retrieved for equity '{}'".format(equity))
-    _entries = map(partial(_fixentry, _nysenow), _opts.tolist())
+    try:
+        logger.info("pushing quote data for {} to mongo".format(equity))
+        dbwrapper.job(dbconn, logger, partial(_save, _opts, _nysenow, test_mode))
+    except ConnectionFailure:
+        logger.exception("could not connect to mongo")
+        return False
+    except:
+        logger.exception("exception pushing quotes for '{}' to mongo".format(equity))
+        return False
     return True
+
+def _save(opt_quotes, nysenow, test_mode, logger, dbclient):
+    logger.info('fixing timestamps')
+    _entries = map(partial(_fixentry, nysenow), opt_quotes.tolist())
+    if test_mode:
+        logger.debug('test mode')
+    else:
+        logger.info('live mode')
 
 def _fixentry(nysenow, entry):
     _fixed = entry
