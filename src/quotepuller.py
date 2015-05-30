@@ -20,7 +20,7 @@ import os.path
 import signal
 import sys
 import threading
-#import time
+import time
 
 from pytz import timezone
 
@@ -86,7 +86,7 @@ class QuotePuller(object):
             _nysenow = dt.datetime.now(tz=timezone('US/Eastern'))
             self.logger.info('time in NY is {}'.format(_nysenow))
             _equities = getequities(self.dbconn, self.logger, self.test_mode)
-            _eqnodes = makequeuenodes(_equities, _nysenow)
+            _eqnodes = makequeuenodes(_equities, _nysenow, self.test_mode)
             for _node in _eqnodes:
                 self.equities.append(_node)
             self.logger.debug(self.equities)
@@ -116,8 +116,9 @@ class QuotePuller(object):
         _counter = 0
         _autofail_tst = 5
         while self.equities:
-            _eq = self.equities.pop()['symbol']
-            # TODO sleep here if eq not ready to process (requeue delay)
+            _queue_node = self.equities.pop()
+            _wait_to_process(self.logger, _queue_node)
+            _eq = _queue_node['symbol']
             if not savequotes(self.dbconn, self.logger, self.test_mode, _eq):
                 self._requeue(_eq)
             if self.test_mode and _counter == _autofail_tst:
@@ -141,6 +142,15 @@ class QuotePuller(object):
         self._die = True
         self._job.cancel()
         sys.exit(0)
+    
+def _wait_to_process(logger, queue_node):
+    _nysenow = dt.datetime.now(tz=timezone('US/Eastern'))
+    _wait_until = queue_node['waitUntil']
+    if _nysenow < _wait_until:
+        _secs_to_wait = (_wait_until - _nysenow).total_seconds()
+        logger.info("item not ready for processing. waiting {} seconds".format(_secs_to_wait))
+        time.sleep(_secs_to_wait)
+    return
 
 if __name__ == '__main__':
     QuotePuller().start()

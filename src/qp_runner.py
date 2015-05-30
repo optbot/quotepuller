@@ -32,7 +32,9 @@ def savequotes(dbconn, logger, test_mode, equity):
     # see if quotes for today are already present
     try:
         if dbwrapper.job(dbconn, logger, partial(_already_saved, equity, _nysenow, _dbname)):
-            return True
+            if not test_mode:
+                return True
+            logger.debug('entries found for {}, continuing in test mode'.format(equity))
     except ConnectionFailure:
         logger.exception("could not connect to mongo")
         return False
