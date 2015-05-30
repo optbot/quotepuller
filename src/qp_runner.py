@@ -33,8 +33,9 @@ def savequotes(dbconn, logger, test_mode, equity):
     try:
         if dbwrapper.job(dbconn, logger, partial(_already_saved, equity, _nysenow, _dbname)):
             if not test_mode:
+                logger.info('entries found for {}'.format(equity))
                 return True
-            logger.debug('entries found for {}, continuing in test mode'.format(equity))
+            logger.debug('continuing anyway in test mode')
     except ConnectionFailure:
         logger.exception("could not connect to mongo")
         return False
@@ -92,7 +93,7 @@ def _already_saved(equity, nysenow, dbname, logger, dbclient):
     if _quotes.find_one({'Underlying': equity, 'Quote_Time': {'$gte': _today}}) is not None:
         logger.warn("{} quotes for '{}' already inserted.".format(nysenow.strftime('%Y-%m-%d'), equity)) 
         return True
-    logger.debug("quotes for '{}' not yet saved".format(equity))
+    logger.info("{} quotes for '{}' not yet saved".format(nysenow.strftime('%Y-%m-%d'), equity))
     return False
 
 def _get_dbname(logger, test_mode):
